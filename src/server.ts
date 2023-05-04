@@ -16,4 +16,5 @@ async function bootstap() {
   // new ReviewStore2Task('0 8 * * *').start()
   new ReviewStoreTask('30 12 * * *').start()
   // await UserService.updateProfiles()
+  // await UserService.storeRewviewd()
 }

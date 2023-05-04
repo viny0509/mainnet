@@ -5,6 +5,7 @@ import { config } from '@/config/config'
 import User from './model'
 import { ellipsisAddress, sleep } from '@/utils'
 import name from '@/resources/name'
+import { uniq } from 'lodash'
 
 class UserService {
   static async createAccounts(nums: number) {
@@ -33,8 +34,8 @@ class UserService {
           address: wallet.address,
           privateKey: wallet.privateKey,
           balance: 0,
-          reviewCount: 0,
           token: resSign?.data?.token,
+          storeReviewed: []
         })
       }
     }
@@ -54,11 +55,11 @@ class UserService {
   }
 
   static async updateProfiles() {
-    const users = await User.find()
+    const users = await User.find().lean()
     const nameShuffled = name.sort(() => 0.5 - Math.random())
     for (let i = 0; i < users.length; i++) {
       await this.updateProfile(users[i].token, {
-        username: ellipsisAddress(users[i].address),
+        username: ellipsisAddress(users[i].address, 4,4),
         cityCode: '',
         countryCode: 'JP',
         nationalCountryCode: 'JP',
@@ -67,6 +68,47 @@ class UserService {
       await sleep(1000)
     }
     console.log(`Update profile done`)
+  }
+
+  static async storeRewviewd () {
+    try {
+      const users = await User.find().lean()
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+      const resUser = await AxiosService.request({
+        method:'GET',
+        url: `${config.apiUrl}/user/profile`,
+        query: {
+          userAddress: user?.address
+        },
+        token: `Bearer ${user.token}`
+      })
+      const userId = resUser?.data?._id
+      const resReview = await AxiosService.request({
+        method: 'GET',
+        url: `${config.apiUrl}/reviews`,
+        query: {
+          limit: 48,
+          page: 1,
+          userId
+        },
+        token: `Bearer ${user.token}`
+      })
+      const storeIds: string[] = (resReview?.data?.items || [])?.map((item: any) => item.storeId)
+      await User.findByIdAndUpdate(user._id, {
+        $set:{
+          userId,
+          storeReviewed: uniq(storeIds)
+        }
+      }, {
+        new: true
+      }).exec()
+      console.log('Update', user.address)
+    }
+    console.log('Done')
+    } catch (error) {
+      console.log('123', error)
+    }
   }
 }
 

@@ -4,8 +4,9 @@ export interface IUser {
   privateKey: string
   address: string
   balance: number
-  reviewCount: number
+  storeReviewed: string[]
   token: string
+  userId?: string
 }
 
 export interface IUserDoc extends IUser, Document {}

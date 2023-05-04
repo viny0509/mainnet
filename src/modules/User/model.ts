@@ -6,8 +6,9 @@ const userSchema = new mongoose.Schema<any, any>(
     privateKey: { type: String, required: true },
     address: { type: String, lowercase: true, unique: true, required: true },
     balance: { type: Number, required: true, default: 0 },
-    reviewCount: { type: Number, required: true, default: 0 },
     token: { type: String, required: true },
+    storeReviewed: { type: [String], default: [] },
+    userId: { type: String },
   },
   { timestamps: true }
 )

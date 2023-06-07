@@ -11,11 +11,12 @@ import { LeanDocument, Types } from 'mongoose'
 export default class ReviewStoreTask extends CronjobService {
   constructor(cronTime: string) {
     super(cronTime)
+    this.processing()
   }
 
   onTick(): () => void {
     return () => {
-      this.processing()
+      // this.processing()
     }
   }
 
@@ -52,7 +53,7 @@ export default class ReviewStoreTask extends CronjobService {
         url: `${config.apiUrl}/reviews`,
         token: `Bearer ${user.token}`,
         body: {
-          star: 5,
+          star: Number((Math.random() * (5 - 4) + 4).toFixed(1)),
           tagIds: [],
           title: '',
           content: '',
@@ -77,11 +78,15 @@ export default class ReviewStoreTask extends CronjobService {
               $inc: {
                 balance: resReward?.data?.reward,
               },
+              $push: {
+                storeReviewed: storeId
+              }
             }
           )
         }
       } else {
         console.log('Reviewable false')
+        return '1'
       }
     } catch (error) {
       console.log('error', error)
@@ -109,17 +114,21 @@ export default class ReviewStoreTask extends CronjobService {
       query: {
         sortBy: 'rankingScore',
         sortDirection: 'asc',
-        countries: 'VN',
-        limit: 3,
+        limit: 48,
         page: 1,
       },
     })
+    const storeIds = resStores?.data?.items?.map((i:any) => i._id).filter((i:any) => !user.storeReviewed.includes(i))
+    const storeShuffled = storeIds.sort(() => 0.5 - Math.random());
 
     for (let i = 0; i < 3; i++) {
-      const store = resStores?.data?.items?.[i] || null
+      const storeId = storeShuffled[i] || null
       console.log(`User ${user.address} review lần ${i + 1}`)
-      if (store?._id) {
-        await this.review(user, new Types.ObjectId(store._id))
+      if (storeId) {
+        const res = await this.review(user, new Types.ObjectId(storeId))
+        if (res === '1') {
+          
+        }
       } else {
         console.error(`User ${user.address} error: store not found`)
       }
@@ -139,16 +148,7 @@ export default class ReviewStoreTask extends CronjobService {
         await this.reviews(user)
         await sleep(2000)
       }
-      // const stores = await AxiosService.request({
-      //   method: 'GET',
-      //   url: `${config.apiUrl}/nfts`,
-      //   query: {
-      //     sortBy: 'rankingScore',
-      //     sortDirection: 'asc',
-      //     limit: 3,
-      //     page: 1,
-      //   },
-      // })
+      console.log("done ----------")
     } catch (error) {
       console.log(error)
     }

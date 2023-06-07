@@ -23,17 +23,20 @@
     },
     "author": "nhatminh0509",
     "dependencies": {
+        "@1inch/permit-signed-approvals-utils": "^1.4.8",
         "@types/qs": "^6.9.7",
+        "alchemy-sdk": "^2.8.2",
         "axios": "^1.3.5",
         "cors": "^2.8.5",
         "cron": "^2.2.0",
         "dotenv": "^16.0.3",
-        "ethers": "^6.3.0",
+        "ethers": "5.5.1",
         "joi": "^17.9.1",
         "lodash": "^4.17.21",
         "mongoose": "^6.9.0",
         "qs": "^6.11.1",
-        "query-string": "^8.1.0"
+        "query-string": "^8.1.0",
+        "web3": "^1.9.0"
     },
     "devDependencies": {
         "@sentio/ethers-v6": "^1.0.25",

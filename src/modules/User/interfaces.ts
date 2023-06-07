@@ -4,6 +4,8 @@ export interface IUser {
   privateKey: string
   address: string
   balance: number
+  balanceWeb3?: number
+  balanceAvax?: number
   storeReviewed: string[]
   token: string
   userId?: string

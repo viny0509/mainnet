@@ -7,10 +7,11 @@ export interface IRequest {
   query?: Record<string, unknown>
   body?: Record<string, unknown>
   token?: string
+  throwError?: boolean
 }
 
 class AxiosService {
-  static async request({ method, url, body, query, token }: IRequest) {
+  static async request({ method, url, body, query, token, throwError }: IRequest) {
     if (query) {
       url = `${url}?${QueryString.stringify(query)}`
     }
@@ -31,10 +32,14 @@ class AxiosService {
         return response.data
       })
       .catch((error) => {
+        console.log(error)
         if (error?.response?.status === 403) {
           console.log('Your session has expired. Please sign in again to continue')
         } else if (!error?.message?.includes('canceled')) {
           console.log(error?.response?.data?.message || 'API Error')
+        }
+        if (throwError) {
+          throw error
         }
         return null
       })
